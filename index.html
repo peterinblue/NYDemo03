@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hello World · NYDemo03</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f7fa;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                 "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    color: #1f2937;
+  }
+  .card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 48px 56px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    max-width: 90vw;
+  }
+  h1 {
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+  h1 span { color: #2563eb; }
+  p.sub {
+    font-size: 15px;
+    color: #6b7280;
+    margin-bottom: 28px;
+  }
+  .info {
+    display: inline-block;
+    text-align: left;
+    background: #f9fafb;
+    border: 1px solid #eef0f3;
+    border-radius: 10px;
+    padding: 14px 20px;
+    font-size: 13px;
+    line-height: 1.9;
+    color: #4b5563;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  }
+  .info b { color: #111827; font-weight: 600; }
+  .btn {
+    margin-top: 26px;
+    display: inline-block;
+    padding: 10px 24px;
+    border-radius: 8px;
+    border: none;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .btn:hover { background: #1d4ed8; }
+  #tip { margin-top: 16px; font-size: 14px; color: #059669; height: 20px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Hello <span>World</span></h1>
+    <p class="sub">NYDemo03 · GitHub Pages 部署测试页面</p>
+    <div class="info">
+      <div><b>Repo：</b>peterinblue/NYDemo03</div>
+      <div><b>Site：</b>https://peterinblue.github.io/NYDemo03/</div>
+      <div><b>Time：</b><span id="now">--</span></div>
+    </div>
+    <div><button class="btn" id="btn">点我一下</button></div>
+    <div id="tip"></div>
+  </div>
+
+<script>
+  function beijingTime() {
+    const d = new Date();
+    const opt = {
+      timeZone: 'Asia/Shanghai',
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      hour12: false
+    };
+    return new Intl.DateTimeFormat('zh-CN', opt).format(d).replace(/\//g, '-');
+  }
+  const nowEl = document.getElementById('now');
+  nowEl.textContent = beijingTime();
+  setInterval(() => { nowEl.textContent = beijingTime(); }, 1000);
+
+  let n = 0;
+  document.getElementById('btn').addEventListener('click', function () {
+    n++;
+    document.getElementById('tip').textContent = '部署成功！你已点击 ' + n + ' 次 🫡';
+  });
+</script>
+</body>
+</html>
