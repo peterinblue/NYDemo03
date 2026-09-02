@@ -211,17 +211,6 @@ body{
 .btn.ghost{background:rgba(6,20,36,.85);border-color:var(--line);color:var(--txt2)}
 .btn.ghost:hover{border-color:var(--cyan);color:var(--cyan)}
 
-/* 类别统计卡 */
-.cat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.cat{
-  background:rgba(6,20,36,.7);border:1px solid var(--line2);border-radius:8px;
-  padding:11px 13px;cursor:pointer;transition:.16s;position:relative;overflow:hidden;
-}
-.cat:hover{border-color:rgba(0,212,255,.5);transform:translateY(-2px)}
-.cat.on{border-color:var(--cyan);background:rgba(0,212,255,.1);box-shadow:0 0 18px rgba(0,212,255,.18)}
-.cat .cn{font-size:11.5px;color:var(--txt2)}
-.cat .cv{font-size:21px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}
-.cat .cb{position:absolute;right:9px;top:9px;width:8px;height:8px;border-radius:50%}
 
 /* 进度条 */
 .bar{height:5px;border-radius:3px;background:rgba(255,255,255,.09);overflow:hidden;margin-top:6px}
@@ -283,8 +272,8 @@ body{
   <div class="grid4">
     <div class="kpi c-cyan"><div class="k-label">探测半径</div><div class="k-val">50<small>m</small></div><div class="k-foot">扫描周期 3.6s / 360°</div></div>
     <div class="kpi c-green"><div class="k-label">设备状态</div><div class="k-val">运行<small>正常</small></div><div class="k-foot">雷达 R-01 · 在线 128h</div></div>
-    <div class="kpi c-orange"><div class="k-label">当前目标数</div><div class="k-val" id="kTarget">6<small>个</small></div><div class="k-foot">静止 3 / 移动 3</div></div>
-    <div class="kpi c-red"><div class="k-label">未处理告警</div><div class="k-val">4<small>条</small></div><div class="k-foot">高危 1 · 中危 2 · 低危 1</div></div>
+    <div class="kpi c-orange"><div class="k-label">当前目标数</div><div class="k-val" id="kTarget">2<small>个</small></div><div class="k-foot">静止 2 / 移动 0</div></div>
+    <div class="kpi c-green"><div class="k-label">告警</div><div class="k-val" id="kAlarm">0<small>条</small></div><div class="k-foot">均在告警环 10m 外</div></div>
   </div>
 
   <div class="grid2 mt16">
@@ -300,10 +289,14 @@ body{
             <defs>
               <radialGradient id="rg"><stop offset="0%" stop-color="#00d4ff" stop-opacity=".20"/><stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/></radialGradient>
             </defs>
+            <!-- 距离环：环线间隔 10m（MAXR 190px = 50m，故每 10m = 38px） -->
             <circle cx="200" cy="200" r="190" fill="url(#rg)" stroke="#1b4468" stroke-width="1"/>
-            <circle cx="200" cy="200" r="150" fill="none" stroke="#1b4468" stroke-width="1" stroke-dasharray="3 5"/>
-            <circle cx="200" cy="200" r="110" fill="none" stroke="#1b4468" stroke-width="1" stroke-dasharray="3 5"/>
-            <circle cx="200" cy="200" r="70" fill="none" stroke="#1b4468" stroke-width="1" stroke-dasharray="3 5"/>
+            <circle cx="200" cy="200" r="152" fill="none" stroke="#1b4468" stroke-width="1" stroke-dasharray="3 5"/>
+            <circle cx="200" cy="200" r="114" fill="none" stroke="#1b4468" stroke-width="1" stroke-dasharray="3 5"/>
+            <circle cx="200" cy="200" r="76"  fill="none" stroke="#1b4468" stroke-width="1" stroke-dasharray="3 5"/>
+            <!-- 告警环 10m -->
+            <circle cx="200" cy="200" r="38" fill="#ff4757" fill-opacity=".10" stroke="#ff4757" stroke-width="1.6" stroke-dasharray="6 4"/>
+            <text x="185" y="172" fill="#ff4757" font-size="9.5" text-anchor="middle">10m</text>
             <line x1="200" y1="10" x2="200" y2="390" stroke="#16405f" stroke-width="1"/>
             <line x1="10" y1="200" x2="390" y2="200" stroke="#16405f" stroke-width="1"/>
             <line x1="66" y1="66" x2="334" y2="334" stroke="#0f3550" stroke-width="1"/>
@@ -312,7 +305,6 @@ body{
             <text x="382" y="204" fill="#5b7a96" font-size="10" text-anchor="middle">90°</text>
             <text x="200" y="386" fill="#5b7a96" font-size="10" text-anchor="middle">180°</text>
             <text x="18" y="204" fill="#5b7a96" font-size="10" text-anchor="middle">270°</text>
-            <text x="200" y="248" fill="none" font-size="0"></text>
           </svg>
           <div class="sweep"></div>
           <div class="sweep-line"></div>
@@ -323,9 +315,9 @@ body{
           </div>
         </div>
         <div class="radar-legend">
-          <span><i style="background:#ffb020;box-shadow:0 0 8px #ffb020"></i>移动目标</span>
-          <span><i style="background:#ff4757;box-shadow:0 0 8px #ff4757"></i>高危目标</span>
           <span><i style="background:#00d4ff;box-shadow:0 0 8px #00d4ff"></i>静止目标</span>
+          <span><i style="background:#ffb020;box-shadow:0 0 8px #ffb020"></i>移动目标</span>
+          <span><i style="background:transparent;width:11px;height:11px;border:1.5px dashed #ff4757;box-shadow:0 0 8px rgba(255,71,87,.55)"></i><span style="color:#ff4757">告警环 10m</span></span>
           <span style="color:#5b7a96">环线间隔 10m</span>
         </div>
       </div>
@@ -343,34 +335,26 @@ body{
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-h"><h3>告警类别统计 <span class="sub">点击卡片筛选下方列表</span></h3></div>
-        <div class="card-b">
-          <div class="cat-grid" id="catGrid"></div>
-        </div>
-      </div>
     </div>
   </div>
 
   <!-- 告警信息列表 -->
   <div class="card mt16">
     <div class="card-h">
-      <h3>告警信息列表 <span class="sub">ALARM RECORDS · 共 <span id="alarmTotal">10</span> 条</span></h3>
-      <button class="btn ghost" onclick="alert('演示原型：此处对接后端导出接口')">导出 Excel</button>
+      <h3>告警信息列表 <span class="sub">ALARM RECORDS · 共 <span id="alarmTotal">2</span> 条</span></h3>
     </div>
     <div class="card-b">
       <div class="filters" style="margin-bottom:12px">
         <select class="sel" id="fCat"><option value="">全部告警类别</option></select>
         <select class="sel" id="fLv"><option value="">全部威胁等级</option><option>高危</option><option>中危</option><option>低危</option></select>
-        <select class="sel" id="fSt"><option value="">全部处理状态</option><option>待处理</option><option>处理中</option><option>已完成</option></select>
-        <input class="inp" id="fKw" placeholder="搜索目标编号 / 告警描述…" style="width:220px">
+        <input class="inp" id="fKw" placeholder="搜索目标编号…" style="width:220px">
         <button class="btn" onclick="renderAlarms()">查询</button>
         <button class="btn ghost" onclick="resetFilter()">重置</button>
       </div>
       <table class="tbl">
         <thead><tr>
-          <th>告警时间</th><th>目标编号</th><th>告警类别</th><th>告警描述</th>
-          <th>方位角</th><th>距离(m)</th><th>威胁等级</th><th>处理状态</th><th>操作</th>
+          <th>告警时间</th><th>目标编号</th><th>告警类别</th>
+          <th>方位角</th><th>距离(m)</th><th>威胁等级</th>
         </tr></thead>
         <tbody id="alarmBody"></tbody>
       </table>
@@ -596,11 +580,7 @@ document.querySelectorAll('.tab').forEach(t=>{
 const R=200, MAXR=190, MAXM=50;   // 画布半径 / 像素半径 / 探测米数
 const targets=[
   {id:'T-01',ang:38, m:12.4, spd:0.0, type:'静止物体', danger:false},
-  {id:'T-02',ang:96, m:24.8, spd:1.2, type:'人员',     danger:false},
-  {id:'T-03',ang:152,m:33.6, spd:0.9, type:'人员',     danger:false},
-  {id:'T-04',ang:214,m:18.2, spd:2.6, type:'车辆',     danger:true },
   {id:'T-05',ang:275,m:41.5, spd:0.0, type:'静止物体', danger:false},
-  {id:'T-06',ang:322,m:28.9, spd:1.7, type:'人员',     danger:false},
 ];
 const box=document.getElementById('radarBox');
 targets.forEach(t=>{
@@ -627,59 +607,32 @@ setInterval(()=>{
 
 // 目标列表
 document.getElementById('tgtCount').textContent='共 '+targets.length+' 个';
+// 告警数：处于 10m 告警环内的目标数（与雷达图红圈联动）
+const ALARM_R=10;
+document.getElementById('kAlarm').innerHTML=
+  targets.filter(t=>t.m<=ALARM_R).length+'<small>条</small>';
 document.getElementById('tgtBody').innerHTML=targets.map(t=>{
   const c=t.danger?'var(--red)':(t.spd>0?'var(--orange)':'var(--cyan)');
   return '<tr><td style="color:'+c+'">'+t.id+'</td><td>'+String(t.ang).padStart(3,'0')+'°</td><td>'+t.m.toFixed(1)+' m</td><td>'+t.spd.toFixed(1)+' m/s</td><td>'+t.type+'</td></tr>';
 }).join('');
 
 /* 告警数据 */
-const CATS=[
-  {n:'入侵探测', v:3, c:'#ff4757'},
-  {n:'越界报警', v:2, c:'#ffb020'},
-  {n:'区域闯入', v:2, c:'#a78bfa'},
-  {n:'设备异常', v:2, c:'#00d4ff'},
-  {n:'信号干扰', v:1, c:'#00ff9d'},
-];
-const catGrid=document.getElementById('catGrid');
-catGrid.innerHTML=CATS.map(c=>
-  '<div class="cat" data-c="'+c.n+'" onclick="pickCat(this)">'+
-  '<span class="cb" style="background:'+c.c+';box-shadow:0 0 8px '+c.c+'"></span>'+
-  '<div class="cn">'+c.n+'</div><div class="cv" style="color:'+c.c+'">'+c.v+'</div></div>'
-).join('');
-document.getElementById('fCat').innerHTML='<option value="">全部告警类别</option>'+
-  CATS.map(c=>'<option>'+c.n+'</option>').join('');
-
-function pickCat(el){
-  const on=el.classList.contains('on');
-  catGrid.querySelectorAll('.cat').forEach(x=>x.classList.remove('on'));
-  if(!on){ el.classList.add('on'); document.getElementById('fCat').value=el.dataset.c; }
-  else document.getElementById('fCat').value='';
-  renderAlarms();
-}
-
 const ALARMS=[
-  {t:'2026-09-02 15:20:33', id:'T-04', c:'入侵探测', d:'车辆高速闯入核心防护区', a:214, m:18.2, lv:'高危', st:'待处理'},
-  {t:'2026-09-02 15:12:07', id:'T-02', c:'越界报警', d:'人员越过电子围栏边界', a:96,  m:24.8, lv:'中危', st:'处理中'},
-  {t:'2026-09-02 14:58:41', id:'T-06', c:'越界报警', d:'人员进入设备检修禁行区', a:322, m:28.9, lv:'中危', st:'待处理'},
-  {t:'2026-09-02 14:41:19', id:'T-03', c:'区域闯入', d:'非授权人员进入机组区域', a:152, m:33.6, lv:'中危', st:'已完成'},
-  {t:'2026-09-02 14:22:56', id:'T-05', c:'区域闯入', d:'静止物体长时间滞留禁停区', a:275, m:41.5, lv:'低危', st:'已完成'},
-  {t:'2026-09-02 13:57:04', id:'R-01', c:'设备异常', d:'雷达探头信号强度衰减', a:'—',  m:'—',   lv:'中危', st:'处理中'},
-  {t:'2026-09-02 13:30:48', id:'T-08', c:'入侵探测', d:'夜间时段防护区出现移动目标', a:58, m:22.4, lv:'高危', st:'已完成'},
-  {t:'2026-09-02 12:46:12', id:'R-02', c:'信号干扰', d:'同频段无线电干扰导致误报', a:'—',  m:'—',   lv:'低危', st:'已完成'},
-  {t:'2026-09-02 11:58:35', id:'T-11', c:'设备异常', d:'雷达模块温度超阈值告警', a:'—',  m:'—',   lv:'中危', st:'已完成'},
-  {t:'2026-09-02 10:24:09', id:'T-09', c:'入侵探测', d:'防护区边界反复触发探测', a:131, m:47.2, lv:'低危', st:'已完成'},
+  {t:'2026-09-02 15:20:33', id:'T-04', c:'入侵探测', d:'车辆高速闯入核心防护区', a:214, m:8.2, lv:'中危'},
+  {t:'2026-09-02 15:12:07', id:'T-02', c:'越界报警', d:'人员越过电子围栏边界', a:96,  m:7.3, lv:'中危'},
 ];
 const lvCls={'高危':'b-high','中危':'b-mid','低危':'b-low'};
-const stCls={'待处理':'b-high','处理中':'b-mid','已完成':'b-ok'};
+// 告警类别下拉：由现有记录动态生成
+document.getElementById('fCat').innerHTML='<option value="">全部告警类别</option>'+
+  [...new Set(ALARMS.map(a=>a.c))].map(n=>'<option>'+n+'</option>').join('');
 
 function renderAlarms(){
   const c=document.getElementById('fCat').value,
         l=document.getElementById('fLv').value,
-        s=document.getElementById('fSt').value,
         k=document.getElementById('fKw').value.trim().toLowerCase();
   const rows=ALARMS.filter(a=>
-    (!c||a.c===c) && (!l||a.lv===l) && (!s||a.st===s) &&
-    (!k|| (a.id+' '+a.d).toLowerCase().includes(k))
+    (!c||a.c===c) && (!l||a.lv===l) &&
+    (!k|| a.id.toLowerCase().includes(k))
   );
   document.getElementById('alarmTotal').textContent=rows.length;
   document.getElementById('alarmBody').innerHTML = rows.length? rows.map(a=>
@@ -687,19 +640,15 @@ function renderAlarms(){
     '<td class="t">'+a.t+'</td>'+
     '<td style="color:var(--cyan)">'+a.id+'</td>'+
     '<td>'+a.c+'</td>'+
-    '<td style="white-space:normal;min-width:190px;color:var(--txt2)">'+a.d+'</td>'+
     '<td>'+(a.a==='—'?'—':a.a+'°')+'</td>'+
-    '<td>'+(a.m==='—'?'—':a.m)+'</td>'+
+    '<td>'+(a.m==='—'?'—':a.m.toFixed(1))+'</td>'+
     '<td><span class="badge '+lvCls[a.lv]+'">'+a.lv+'</span></td>'+
-    '<td><span class="badge '+stCls[a.st]+'">'+a.st+'</span></td>'+
-    '<td><span class="link" onclick="alert(\'演示原型：跳转告警详情 / 工单处理\')">详情</span></td>'+
     '</tr>').join('')
-    : '<tr><td colspan="9" style="text-align:center;padding:26px;color:var(--txt3)">暂无数据</td></tr>';
+    : '<tr><td colspan="6" style="text-align:center;padding:26px;color:var(--txt3)">暂无数据</td></tr>';
 }
 function resetFilter(){
-  ['fCat','fLv','fSt'].forEach(i=>document.getElementById(i).value='');
+  ['fCat','fLv'].forEach(i=>document.getElementById(i).value='');
   document.getElementById('fKw').value='';
-  catGrid.querySelectorAll('.cat').forEach(x=>x.classList.remove('on'));
   renderAlarms();
 }
 renderAlarms();
