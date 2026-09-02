@@ -134,15 +134,20 @@ body{
 }
 .core{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:96px;height:96px;border-radius:14px;
+  width:118px;padding:10px 8px;border-radius:14px;box-sizing:border-box;
   background:linear-gradient(160deg,rgba(0,90,140,.95),rgba(6,32,54,.98));
   border:1px solid rgba(0,212,255,.55);
   box-shadow:0 0 26px rgba(0,212,255,.45), 0 0 44px rgba(0,120,190,.25) inset;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;z-index:5;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;z-index:5;
 }
-.core .ic{font-size:23px;line-height:1;filter:drop-shadow(0 0 6px rgba(0,212,255,.7))}
-.core .nm{font-size:10.5px;color:var(--cyan);letter-spacing:.5px;font-weight:600}
-.core .sn{font-size:9px;color:var(--txt3);letter-spacing:.5px}
+.core .nm{
+  font-size:11px;color:var(--cyan);font-weight:600;letter-spacing:.3px;
+  line-height:1.35;text-align:center;word-break:break-all;
+}
+.core .sn{
+  font-size:10.5px;color:var(--txt2);letter-spacing:1px;font-weight:600;
+  padding-top:4px;border-top:1px solid rgba(0,212,255,.22);width:100%;text-align:center;
+}
 .core::after{
   content:"";position:absolute;inset:-11px;border-radius:20px;border:1px solid rgba(0,212,255,.28);
   animation:pulseRing 2.2s ease-out infinite;
@@ -280,7 +285,7 @@ body{
     <!-- 雷达扫描 -->
     <div class="card">
       <div class="card-h">
-        <h3>雷达扫描监测 <span class="sub">RADAR SCAN · 中心设备：多联机机组</span></h3>
+        <h3>雷达扫描监测 <span class="sub">RADAR SCAN · 中心设备：模块化多功能充电装置 LYJ-01</span></h3>
         <span class="badge b-ok"><span class="pulse-dot"></span>扫描中</span>
       </div>
       <div class="card-b radar-wrap">
@@ -309,9 +314,8 @@ body{
           <div class="sweep"></div>
           <div class="sweep-line"></div>
           <div class="core">
-            <div class="ic">❄</div>
-            <div class="nm">多联机机组</div>
-            <div class="sn">VRF-01</div>
+            <div class="nm">模块化多功能充电装置</div>
+            <div class="sn">LYJ-01</div>
           </div>
         </div>
         <div class="radar-legend">
