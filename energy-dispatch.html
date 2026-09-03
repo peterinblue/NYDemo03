@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模块化多功能充电装置 LYJ-01 · 智能优化调度 · 航能智巡</title>
+<style>
+:root{
+  --bg:#071322; --bg2:#050e1f; --bg3:#02060d;
+  --panel:rgba(13,33,54,.82); --panel2:rgba(10,26,46,.72);
+  --line:#1b4468; --line2:#123253;
+  --cyan:#00d4ff; --cyan-d:#0891b2; --cyan-g:rgba(0,212,255,.18);
+  --green:#00ff9d; --green-g:rgba(0,255,157,.18);
+  --orange:#ffb020; --orange-g:rgba(255,176,32,.18);
+  --red:#ff4757; --red-g:rgba(255,71,87,.18);
+  --purple:#a78bfa; --purple-g:rgba(167,139,250,.18);
+  --pink:#ff6dc8; --pink-g:rgba(255,109,200,.18);
+  --txt:#e6f4fb; --txt2:#8fa8bd; --txt3:#5b7a96;
+  --accent:#5e3aff; --accent2:#8265ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:radial-gradient(ellipse at 50% 0%,#0a2244 0%,#050e1f 40%,#02060d 100%);color:var(--txt);font-family:"Microsoft YaHei","PingFang SC",sans-serif;font-size:13px;line-height:1.5;min-height:100vh;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;background-image:radial-gradient(2px 2px at 20% 30%,rgba(0,212,255,.4) 0,transparent 50%),radial-gradient(2px 2px at 60% 70%,rgba(167,139,250,.3) 0,transparent 50%),radial-gradient(1px 1px at 80% 20%,rgba(0,255,157,.35) 0,transparent 50%),radial-gradient(1px 1px at 30% 80%,rgba(255,176,32,.3) 0,transparent 50%);pointer-events:none;z-index:0;animation:starpulse 4s ease-in-out infinite alternate}
+@keyframes starpulse{0%{opacity:.7}100%{opacity:1}}
+
+/* 顶栏 */
+.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:linear-gradient(180deg,rgba(7,19,34,.96) 0,rgba(7,19,34,.86) 100%);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:14px}
+.brand .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#00d4ff 0,#5e3aff 100%);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;box-shadow:0 0 18px rgba(0,212,255,.5),inset 0 0 12px rgba(255,255,255,.18);position:relative}
+.brand .logo::after{content:"";position:absolute;inset:-4px;border-radius:14px;border:1px solid rgba(0,212,255,.35);animation:spin 6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.brand h1{font-size:17px;font-weight:600;background:linear-gradient(90deg,#fff,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.5px}
+.brand .sub{font-size:11px;color:var(--txt3);margin-top:2px}
+.topbar-right{display:flex;align-items:center;gap:14px;font-size:12px;color:var(--txt2)}
+.clock{font-family:"Consolas",monospace;font-size:14px;color:var(--cyan);font-variant-numeric:tabular-nums;padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:rgba(0,212,255,.06)}
+.status-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:14px;background:rgba(0,255,157,.1);border:1px solid rgba(0,255,157,.35);color:var(--green);font-size:11.5px;font-weight:600}
+.status-pill::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* 设备信息条 */
+.device-bar{margin:18px 28px 0;padding:14px 20px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(135deg,rgba(13,33,54,.6),rgba(10,26,46,.4));display:flex;align-items:center;gap:24px;flex-wrap:wrap;position:relative;z-index:1}
+.device-bar .dev-title{display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;color:var(--cyan)}
+.device-bar .dev-title .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.device-bar .dev-info{font-size:12px;color:var(--txt2);display:flex;flex-wrap:wrap;gap:18px}
+.device-bar .dev-info span b{color:var(--txt);font-weight:500;margin-right:4px}
+
+/* Tabs */
+.tabs{display:flex;gap:0;margin:18px 28px 0;padding:0;border-bottom:1px solid var(--line);position:relative;z-index:1}
+.tab{padding:12px 24px;font-size:14px;font-weight:500;color:var(--txt2);cursor:pointer;position:relative;border-radius:8px 8px 0 0;transition:color .2s;display:flex;align-items:center;gap:8px}
+.tab:hover{color:var(--cyan)}
+.tab.on{color:var(--cyan);background:linear-gradient(180deg,rgba(0,212,255,.08),transparent);box-shadow:inset 0 1px 0 var(--cyan)}
+.tab.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,var(--cyan),var(--purple));box-shadow:0 0 8px var(--cyan-g)}
+.tab .badge{margin-left:6px;padding:1px 7px;border-radius:10px;font-size:10px;background:var(--cyan-g);color:var(--cyan);font-weight:600}
+
+main{padding:0 28px 36px;position:relative;z-index:1}
+.panel{display:none;animation:fadein .3s ease}
+.panel.on{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* 通用卡片 */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;backdrop-filter:blur(6px);position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan-g),transparent)}
+.card-h{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line2)}
+.card-h h3{font-size:14px;font-weight:600;color:var(--txt);display:flex;align-items:center;gap:8px;letter-spacing:.3px}
+.card-h h3::before{content:"";width:3px;height:14px;background:linear-gradient(180deg,var(--cyan),var(--accent2));border-radius:2px}
+.card-h .sub{font-size:11.5px;color:var(--txt3);font-weight:400;margin-left:6px;letter-spacing:.5px}
+.card-b{padding:18px}
+
+/* KPI 卡片 */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.kpi{padding:18px 20px;background:linear-gradient(135deg,rgba(13,33,54,.6),rgba(10,26,46,.5));border:1px solid var(--line);border-radius:12px;position:relative;overflow:hidden}
+.kpi::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px}
+.kpi.c-cyan::after{background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.kpi.c-purple::after{background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+.kpi.c-green::after{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.kpi.c-orange::after{background:linear-gradient(90deg,transparent,var(--orange),transparent)}
+.kpi .k-label{font-size:12px;color:var(--txt2);display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.kpi .k-label::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--cyan);box-shadow:0 0 6px var(--cyan-g)}
+.kpi.c-purple .k-label::before{background:var(--purple);box-shadow:0 0 6px var(--purple-g)}
+.kpi.c-green .k-label::before{background:var(--green);box-shadow:0 0 6px var(--green-g)}
+.kpi.c-orange .k-label::before{background:var(--orange);box-shadow:0 0 6px var(--orange-g)}
+.kpi .k-val{font-size:28px;font-weight:700;color:var(--txt);font-variant-numeric:tabular-nums;line-height:1.1}
+.kpi .k-val small{font-size:14px;color:var(--txt2);font-weight:400;margin-left:4px}
+.kpi .k-foot{margin-top:6px;font-size:11.5px;color:var(--txt3)}
+.kpi .k-foot b{color:var(--green);font-weight:600}
+.kpi .k-foot b.down{color:var(--red)}
+
+/* 布局 */
+.row{display:grid;gap:16px}
+.row.c2-1{grid-template-columns:1.3fr 1fr}
+.row.c1-1{grid-template-columns:1fr 1fr}
+.row.c1-2{grid-template-columns:1fr 1.5fr}
+.mt16{margin-top:16px}.mt20{margin-top:20px}
+
+/* 系统运行曲线 */
+.chart-wrap{padding:14px 8px 6px}
+.chart-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding:0 10px}
+.chart-title .tags{display:flex;flex-wrap:wrap;gap:14px;font-size:11.5px;color:var(--txt2)}
+.chart-title .tags span{display:inline-flex;align-items:center;gap:6px}
+.chart-title .tags i{width:10px;height:3px;border-radius:2px;background:var(--cyan)}
+.chart-title .acc{padding:4px 10px;border-radius:14px;background:rgba(0,212,255,.12);border:1px solid rgba(0,212,255,.4);color:var(--cyan);font-size:11.5px;font-weight:600}
+
+/* 表格/表单 */
+.form-row{display:flex;gap:14px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.form-row .label{font-size:12.5px;color:var(--txt2);min-width:96px;display:flex;align-items:center;gap:6px}
+.form-row .label .req{color:var(--red);font-weight:700}
+.inp{padding:7px 11px;background:rgba(0,30,60,.55);border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12.5px;font-family:inherit;outline:none;transition:.15s;width:160px}
+.inp:focus{border-color:var(--cyan);box-shadow:0 0 8px var(--cyan-g)}
+.inp.short{width:90px}
+.sel{padding:7px 30px 7px 11px;background:rgba(0,30,60,.55) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%2300d4ff' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>") no-repeat right 11px center;border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12.5px;outline:none;appearance:none;cursor:pointer;min-width:160px}
+.sel:focus{border-color:var(--cyan)}
+.sel.short{min-width:120px}
+
+/* radio 行 */
+.radio-group{display:flex;flex-direction:column;gap:10px}
+.radio{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12.5px;color:var(--txt2);padding:4px 0;transition:.15s}
+.radio input{appearance:none;width:16px;height:16px;border:1.5px solid var(--line);border-radius:50%;position:relative;cursor:pointer;background:rgba(0,30,60,.5);transition:.15s;flex-shrink:0}
+.radio input:checked{border-color:var(--cyan);background:rgba(0,212,255,.12)}
+.radio input:checked::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--cyan);box-shadow:0 0 6px var(--cyan)}
+.radio:hover{color:var(--txt)}
+.radio input:checked + span{color:var(--cyan);font-weight:500}
+
+/* 范围调节 */
+.range-group{display:flex;align-items:center;gap:6px}
+.range-btn{width:26px;height:26px;border:1px solid var(--line);border-radius:6px;background:rgba(0,30,60,.55);color:var(--cyan);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
+.range-btn:hover{border-color:var(--cyan);background:rgba(0,212,255,.12)}
+.range-input{width:60px;text-align:center;padding:5px 4px;background:rgba(0,30,60,.55);border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12.5px;outline:none}
+
+/* 勾选行 */
+.check-group{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.check{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12.5px;color:var(--txt2);padding:4px 0}
+.check input{appearance:none;width:16px;height:16px;border:1.5px solid var(--line);border-radius:3px;position:relative;cursor:pointer;background:rgba(0,30,60,.5);transition:.15s;flex-shrink:0}
+.check input:checked{border-color:var(--cyan);background:var(--cyan)}
+.check input:checked::after{content:"✓";position:absolute;inset:0;color:#02060d;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.check:hover{color:var(--txt)}
+.check input:checked + span{color:var(--cyan);font-weight:500}
+
+/* 按钮 */
+.btn{padding:9px 22px;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:.2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:linear-gradient(135deg,#5e3aff,#8265ff);color:#fff;box-shadow:0 4px 14px rgba(94,58,255,.4)}
+.btn-primary:hover{box-shadow:0 4px 18px rgba(130,101,255,.6);transform:translateY(-1px)}
+.btn-ghost{background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--txt2)}
+.btn-ghost:hover{color:var(--cyan);border-color:var(--cyan)}
+.btn-mini{padding:5px 12px;font-size:11.5px;border-radius:5px}
+.btn-add{padding:4px 10px;font-size:12px;background:linear-gradient(135deg,#0088e0,#00d4ff);color:#fff;font-weight:500}
+
+/* AI 模型版本卡 */
+.ai-card{background:linear-gradient(160deg,rgba(94,58,255,.1),rgba(10,26,46,.4));border:1px solid rgba(130,101,255,.3)}
+.ai-card .version-tag{padding:4px 10px;border-radius:5px;background:rgba(94,58,255,.25);border:1px solid rgba(130,101,255,.4);color:var(--purple);font-size:12px;font-weight:600}
+.ai-status{margin:14px 0;display:flex;flex-direction:column;gap:10px}
+.ai-status .row-info{display:flex;gap:24px;flex-wrap:wrap;font-size:12px;color:var(--txt2)}
+.ai-status .row-info b{color:var(--txt);font-weight:500;margin-left:4px}
+.ai-status .status-line{display:flex;align-items:center;gap:8px;color:var(--green);font-size:13px;font-weight:500}
+.ai-status .status-line .ok-dot{width:14px;height:14px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green-g);display:inline-flex;align-items:center;justify-content:center;color:#02060d;font-size:10px;font-weight:700}
+.ai-desc{margin-top:14px;padding:14px;background:rgba(0,20,40,.45);border-left:3px solid var(--purple);border-radius:6px;font-size:12px;color:var(--txt2);line-height:1.7;max-height:200px;overflow-y:auto}
+.ai-desc::-webkit-scrollbar{width:6px}
+.ai-desc::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+.ai-desc b{color:var(--purple);font-weight:600}
+.ai-desc u{color:var(--cyan);text-decoration:none;border-bottom:1px dashed var(--cyan);cursor:help}
+
+/* 底部对比图 */
+.compare-chart{padding:12px 14px 14px}
+
+/* Tab 2 - 调度策略 */
+.strategy-top{display:flex;align-items:center;gap:18px;margin-bottom:16px;flex-wrap:wrap}
+.strategy-top .label{font-size:13px;color:var(--txt2)}
+.strategy-top .sel{min-width:180px}
+.strategy-top .ml-auto{margin-left:auto}
+
+/* 标签策略 */
+.tag-list{display:flex;flex-wrap:wrap;gap:10px;padding:4px 0}
+.strat-tag{display:inline-flex;align-items:center;gap:6px;padding:6px 10px 6px 14px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.4);border-radius:18px;font-size:12px;color:var(--cyan);font-weight:500;cursor:pointer;transition:.15s}
+.strat-tag.on{background:rgba(0,212,255,.22);box-shadow:0 0 12px var(--cyan-g);border-color:var(--cyan)}
+.strat-tag:hover{background:rgba(0,212,255,.18)}
+.strat-tag .ic{color:var(--txt3);font-size:11px;cursor:pointer;padding:0 3px;transition:.15s}
+.strat-tag .ic:hover{color:var(--orange)}
+.strat-tag .ic.del:hover{color:var(--red)}
+
+/* 保护策略卡 */
+.protect-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:14px}
+.protect-card{background:rgba(0,20,40,.5);border:1px solid var(--line);border-radius:10px;padding:16px;position:relative}
+.protect-card .pc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line2)}
+.protect-card .pc-head .pc-name{font-size:13.5px;font-weight:600;color:var(--txt)}
+.protect-card .pc-head .pc-name::before{content:"";display:inline-block;width:3px;height:13px;background:var(--cyan);margin-right:8px;vertical-align:middle;border-radius:2px}
+.protect-card .pc-field{margin-bottom:14px}
+.protect-card .pc-field .lab{font-size:12px;color:var(--txt2);margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.protect-card .pc-field .lab .req{color:var(--red)}
+
+/* 开关 */
+.switch{position:relative;width:38px;height:20px;border-radius:11px;background:rgba(80,100,120,.4);cursor:pointer;transition:.25s;border:1px solid var(--line)}
+.switch::after{content:"";position:absolute;left:2px;top:2px;width:14px;height:14px;border-radius:50%;background:#bcc7d1;transition:.25s}
+.switch.on{background:linear-gradient(135deg,#0088e0,#00d4ff);border-color:var(--cyan);box-shadow:0 0 8px var(--cyan-g)}
+.switch.on::after{left:20px;background:#fff;box-shadow:0 0 4px rgba(255,255,255,.6)}
+
+/* 时段调度表 */
+.time-slot{margin-top:18px}
+.time-slot .ts-head{display:grid;grid-template-columns:1.6fr 1fr 1fr 60px;gap:14px;padding:0 16px 10px;font-size:12px;color:var(--txt3);letter-spacing:.5px;border-bottom:1px solid var(--line2)}
+.time-slot .ts-row{display:grid;grid-template-columns:1.6fr 1fr 1fr 60px;gap:14px;padding:14px 16px;align-items:center;border-bottom:1px dashed var(--line2)}
+.time-slot .ts-row:last-child{border-bottom:none}
+.time-pickers{display:flex;gap:8px;align-items:center}
+.time-pickers .inp{width:120px}
+.time-pickers .arrow{color:var(--txt3)}
+
+/* 响应式 */
+@media (max-width:1100px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .row.c2-1,.row.c1-1,.row.c1-2{grid-template-columns:1fr}
+  .protect-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">⚡</div>
+    <div>
+      <h1>模块化多功能充电装置 LYJ-01 · 智能优化调度</h1>
+      <div class="sub">AI-OPTIMIZED ENERGY DISPATCH · 航能智巡充换电集群管控软件 · v1.03</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="status-pill">AI 模型在线</span>
+    <span class="clock" id="clock">--:--:--</span>
+    <span style="color:var(--txt3)">|</span>
+    <span>2026-09-03</span>
+  </div>
+</header>
+
+<!-- 设备信息条 -->
+<div class="device-bar">
+  <div class="dev-title"><span class="dot"></span>设备主体 LYJ-01</div>
+  <div class="dev-info">
+    <span><b>类型</b>光储柴一体机</span>
+    <span><b>子系统</b>9 大类</span>
+    <span><b>额定功率</b>500 kW</span>
+    <span><b>储能容量</b>215 kWh</span>
+    <span><b>光伏装机</b>30 kWp</span>
+    <span><b>柴发备机</b>50 kW</span>
+    <span><b>在线时长</b>128h 36min</span>
+  </div>
+</div>
+
+<!-- Tab 切换 -->
+<div class="tabs">
+  <div class="tab on" data-tab="ai"><span>AI 优化调度</span><span class="badge">科研课题</span></div>
+  <div class="tab" data-tab="strat">调度策略</div>
+</div>
+
+<main>
+
+<!-- ========== Tab 1: AI 优化调度 ========== -->
+<section class="panel on" id="tab-ai">
+
+  <!-- 优化调度概览 KPI -->
+  <div class="kpi-grid">
+    <div class="kpi c-purple">
+      <div class="k-label">优化目标</div>
+      <div class="k-val" style="font-size:18px;color:var(--purple)">最小化运行成本</div>
+      <div class="k-foot">当前方案策略 · 单选切换</div>
+    </div>
+    <div class="kpi c-green">
+      <div class="k-label">预计运行成本</div>
+      <div class="k-val">¥8,742.56<small></small></div>
+      <div class="k-foot">较昨日 <b class="down">↓ 12.7%</b></div>
+    </div>
+    <div class="kpi c-cyan">
+      <div class="k-label">可用能源利用率</div>
+      <div class="k-val">86.3<small>%</small></div>
+      <div class="k-foot">较昨日 <b>↑ 5.7%</b></div>
+    </div>
+    <div class="kpi c-orange">
+      <div class="k-label">AI 优化耗时</div>
+      <div class="k-val">42.8<small>秒</small></div>
+      <div class="k-foot">上次优化 08:30</div>
+    </div>
+  </div>
+
+  <!-- 系统运行曲线 -->
+  <div class="card mt16">
+    <div class="card-h">
+      <h3>系统运行曲线 <span class="sub">REAL-TIME OPERATION</span></h3>
+      <div style="display:flex;gap:10px;align-items:center">
+        <span style="font-size:11.5px;color:var(--txt3)">预测准确率</span>
+        <span class="acc">92.7%</span>
+      </div>
+    </div>
+    <div class="card-b">
+      <div class="chart-title">
+        <div class="tags">
+          <span><i style="background:#00d4ff"></i>市电</span>
+          <span><i style="background:#ffb020"></i>光伏</span>
+          <span><i style="background:#ff4757"></i>储能</span>
+          <span><i style="background:#a78bfa"></i>负载</span>
+          <span><i style="background:#00ff9d"></i>充放电预测</span>
+          <span><i style="background:#ff6dc8"></i>SOC</span>
+        </div>
+        <div style="font-size:11px;color:var(--txt3)">单位：kW（左） · %（右）</div>
+      </div>
+      <div id="opCurve" style="position:relative"></div>
+    </div>
+  </div>
+
+  <!-- 优化参数 + AI 模型版本 -->
+  <div class="row c2-1 mt16">
+    <div class="card">
+      <div class="card-h"><h3>优化参数设置 <span class="sub">OPTIMIZATION PARAMETERS</span></h3></div>
+      <div class="card-b">
+        <div class="form-row" style="margin-bottom:16px">
+          <div class="label" style="min-width:96px"><span class="req">*</span>优化目标优先级</div>
+          <div class="radio-group" style="flex:1">
+            <label class="radio"><input type="radio" name="goal" checked><span>最小化运行成本</span></label>
+            <label class="radio"><input type="radio" name="goal"><span>最大化再生能源利用</span></label>
+            <label class="radio"><input type="radio" name="goal"><span>最高供电可靠性</span></label>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="label" style="min-width:96px">优化时间范围</div>
+          <select class="sel">
+            <option>24 小时（今日）</option>
+            <option>未来 3 日</option>
+            <option>未来 7 日</option>
+            <option>自定义</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="label" style="min-width:96px">储能系统约束</div>
+          <div class="range-group" style="gap:14px">
+            <div class="range-group">
+              <button class="range-btn">−</button>
+              <input type="number" class="range-input" value="20">
+              <button class="range-btn">+</button>
+            </div>
+            <span style="color:var(--txt3)">~</span>
+            <div class="range-group">
+              <button class="range-btn">−</button>
+              <input type="number" class="range-input" value="95">
+              <button class="range-btn">+</button>
+            </div>
+            <span style="font-size:12px;color:var(--txt3);margin-left:4px">%（SOC 上下限）</span>
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:6px">
+          <div class="label" style="min-width:96px">参与优化的设备</div>
+          <div class="check-group" style="flex:1">
+            <label class="check"><input type="checkbox" checked><span>光伏系统</span></label>
+            <label class="check"><input type="checkbox" checked><span>储能系统</span></label>
+            <label class="check"><input type="checkbox" checked><span>电网交互</span></label>
+            <label class="check"><input type="checkbox"><span>需求响应</span></label>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line2)">
+          <button class="btn btn-primary">应用参数并优化</button>
+          <button class="btn btn-ghost">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card ai-card">
+      <div class="card-h">
+        <h3>AI 模型版本 <span class="sub">AI MODEL</span></h3>
+        <div class="version-tag">V1.03</div>
+      </div>
+      <div class="card-b">
+        <div class="ai-status">
+          <div class="status-line"><span class="ok-dot">✓</span>已训练完成</div>
+          <div class="row-info"><span>更新时间<b>2026-05-15</b></span></div>
+          <div class="row-info" style="color:var(--txt3);font-size:11.5px">版本说明：V1.03 智能精细化调度版本（迭代成熟版）</div>
+        </div>
+        <div class="ai-desc">
+          <b>V1.03</b> 为当前最新迭代的成熟版本，聚焦双端管控、<u>精细化节能降碳</u>，全场景智能调度全能力升级。<br><br>
+          在 V1.02 动态调度能力基础上，深度融合<u>平台调度等模块</u>、<u>储能 SOC 管控体系</u>、<u>负荷数据联动调度</u>、<u>降维约束能力模型</u>、<u>多目标动态优化算法</u>，构建"算测数据可用、降耗、减碳、降本"多重监控目标。<br><br>
+          该版本优化算法迭代机，支持海量时序数据自主学习、模型参数自适应迭代，大幅提升电压应力、极端气候、错峰生产等特殊场景的端调度能力。新增分布式控制策略、调度方案自适应生成、能耗碳排放分析新升级，实现光伏、储能、市电、负载 <b>7 条线路</b>的全场景智能优化调度，同时比原标准优化算法能耗碳排放更低、闭环自适应调度优化、<u>节能减排与绿色低碳驱动目标</u>，且能做到的可实时性与行业示范推广价值。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 优化效果对比 -->
+  <div class="card mt16">
+    <div class="card-h">
+      <h3>AI 调度 vs 传统阈值调度 对比 <span class="sub">PERFORMANCE COMPARISON</span></h3>
+      <div style="display:flex;gap:14px;font-size:11.5px;color:var(--txt2)">
+        <span style="display:inline-flex;align-items:center;gap:6px"><i style="width:10px;height:10px;background:#00d4ff;border-radius:2px;display:inline-block"></i>AI 智能优化调度</span>
+        <span style="display:inline-flex;align-items:center;gap:6px"><i style="width:10px;height:10px;background:#ffb020;border-radius:2px;display:inline-block"></i>传统阈值调度</span>
+        <span style="display:inline-flex;align-items:center;gap:6px"><i style="width:10px;height:3px;background:#00ff9d;border-radius:1px;display:inline-block"></i>AI 优化提升幅度</span>
+      </div>
+    </div>
+    <div class="card-b">
+      <div id="compareChart"></div>
+    </div>
+  </div>
+
+  </section>
+
+<!-- ========== Tab 2: 调度策略 ========== -->
+<section class="panel" id="tab-strat">
+
+  <!-- 顶部策略下拉 -->
+  <div class="card">
+    <div class="card-b" style="padding:14px 18px">
+      <div class="strategy-top">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="label">当前调度策略</span>
+          <select class="sel">
+            <option>test</option>
+            <option>测试456</option>
+            <option>测试005</option>
+            <option>3213</option>
+            <option>788</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="label">充放电策略</span>
+          <select class="sel">
+            <option>1# 光储充</option>
+            <option>2# 光储充</option>
+            <option>混合经济调度</option>
+          </select>
+        </div>
+        <div class="ml-auto">
+          <button class="btn btn-add">+ 新增</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 策略管理 + 保护策略 -->
+  <div class="card mt16">
+    <div class="card-h">
+      <h3>策略管理 <span class="sub">STRATEGY MANAGEMENT</span></h3>
+      <button class="btn btn-mini btn-ghost">编辑</button>
+    </div>
+    <div class="card-b">
+      <div class="tag-list" id="tagList">
+        <span class="strat-tag on">test <span class="ic">✎</span><span class="ic del">🗑</span></span>
+        <span class="strat-tag">测试456 <span class="ic">✎</span><span class="ic del">🗑</span></span>
+        <span class="strat-tag">测试005 <span class="ic">✎</span><span class="ic del">🗑</span></span>
+        <span class="strat-tag">3213 <span class="ic">✎</span><span class="ic del">🗑</span></span>
+        <span class="strat-tag">788 <span class="ic">✎</span><span class="ic del">🗑</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 保护策略配置 -->
+  <div class="card mt16">
+    <div class="card-h"><h3>保护策略配置 <span class="sub">PROTECTION STRATEGY</span></h3></div>
+    <div class="card-b">
+      <div class="protect-grid">
+
+        <!-- 需量保护 -->
+        <div class="protect-card">
+          <div class="pc-head">
+            <div class="pc-name">需量保护</div>
+            <div class="switch on"></div>
+          </div>
+          <div class="pc-field">
+            <div class="lab"><span class="req">*</span>最大需量阈值(kW)</div>
+            <input class="inp" type="number" value="20.00">
+          </div>
+          <div class="pc-field">
+            <div class="lab"><span class="req">*</span>需量预警阈值(%)</div>
+            <input class="inp" type="number" value="20.00">
+          </div>
+          <div class="pc-field">
+            <div class="lab"><span class="req">*</span>响应动作</div>
+            <select class="sel"><option>限制功率</option><option>告警</option><option>切除负载</option></select>
+          </div>
+        </div>
+
+        <!-- 逆功率保护 -->
+        <div class="protect-card">
+          <div class="pc-head">
+            <div class="pc-name">逆功率保护</div>
+            <div class="switch on"></div>
+          </div>
+          <div class="pc-field">
+            <div class="lab"><span class="req">*</span>逆功率阈值(kW)</div>
+            <input class="inp" type="number" value="50.00">
+          </div>
+          <div class="pc-field">
+            <div class="lab"><span class="req">*</span>响应动作</div>
+            <select class="sel"><option>告警</option><option>限制功率</option><option>切除负载</option></select>
+          </div>
+        </div>
+
+        <!-- 电池保护 -->
+        <div class="protect-card">
+          <div class="pc-head">
+            <div class="pc-name">电池保护</div>
+            <div class="switch on"></div>
+          </div>
+          <div class="pc-field">
+            <div class="lab"><span class="req">*</span>SOC 上限(%)</div>
+            <input class="inp" type="number" value="100.00">
+          </div>
+          <div class="pc-field">
+            <div class="lab"><span class="req">*</span>SOC 下限(%)</div>
+            <input class="inp" type="number" value="100.00">
+          </div>
+          <div class="pc-field">
+            <div class="lab"><span class="req">*</span>最大充电功率(kW)</div>
+            <input class="inp" type="number" value="1000.00">
+          </div>
+          <div class="pc-field">
+            <div class="lab"><span class="req">*</span>最大放电功率(kW)</div>
+            <input class="inp" type="number" value="10.00">
+          </div>
+          <div class="pc-field">
+            <div class="lab"><span class="req">*</span>温度保护阈值(℃)</div>
+            <input class="inp" type="number" value="1000.00">
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 自定义时段调度 -->
+  <div class="card mt16 time-slot">
+    <div class="card-h"><h3>自定义时段调度 <span class="sub">CUSTOM TIME-SLOT DISPATCH</span></h3><button class="btn btn-add" onclick="addSlot()">+ 添加时段</button></div>
+    <div class="card-b">
+      <div class="ts-head">
+        <div>时段设置（开始 ~ 结束）</div>
+        <div>充放电状态</div>
+        <div>有功功率(kW)</div>
+        <div style="text-align:center">操作</div>
+      </div>
+      <div id="slotList">
+        <div class="ts-row">
+          <div class="time-pickers">
+            <input class="inp" type="time" value="00:15">
+            <span class="arrow">~</span>
+            <input class="inp" type="time" value="00:45">
+          </div>
+          <select class="sel"><option>充电</option><option selected>放电</option><option>待机</option></select>
+          <input class="inp" type="number" value="100.00">
+          <div style="text-align:center"><span class="ic" style="cursor:pointer;color:var(--red)" onclick="this.parentElement.parentElement.remove()">🗑</span></div>
+        </div>
+        <div class="ts-row">
+          <div class="time-pickers">
+            <input class="inp" type="time" value="00:45">
+            <span class="arrow">~</span>
+            <input class="inp" type="time" value="01:30">
+          </div>
+          <select class="sel"><option selected>充电</option><option>放电</option><option>待机</option></select>
+          <input class="inp" type="number" value="520.00">
+          <div style="text-align:center"><span class="ic" style="cursor:pointer;color:var(--red)" onclick="this.parentElement.parentElement.remove()">🗑</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+</main>
+
+<script>
+/* ========== 时钟 ========== */
+function tick(){
+  const d=new Date();
+  const p=n=>String(n).padStart(2,'0');
+  document.getElementById('clock').textContent=`${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+tick(); setInterval(tick,1000);
+
+/* ========== Tab 切换 ========== */
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+    t.classList.add('on');
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+    document.getElementById('tab-'+t.dataset.tab).classList.add('on');
+    // 重绘图表（display:none 时尺寸为 0）
+    setTimeout(()=>{drawOpCurve(); drawCompare();},50);
+  });
+});
+
+/* ========== 优化目标切换 → 顶部 KPI 卡联动 ========== */
+const goalMap={
+  '最小化运行成本':{val:'¥8,742.56',foot:'较昨日 <b class="down">↓ 12.7%</b>',color:'green'},
+  '最大化再生能源利用':{val:'¥9,213.40',foot:'较昨日 <b class="down">↓ 9.4%</b>',color:'green'},
+  '最高供电可靠性':{val:'¥9,856.10',foot:'较昨日 <b class="down">↓ 4.2%</b>',color:'green'},
+};
+document.querySelectorAll('input[name=goal]').forEach(r=>{
+  r.addEventListener('change',()=>{
+    if(!r.checked) return;
+    const name=r.nextElementSibling.textContent.trim();
+    const data=goalMap[name]; if(!data) return;
+    const kpi=document.querySelector('.kpi.c-green');
+    kpi.querySelector('.k-val').textContent=data.val;
+    kpi.querySelector('.k-foot').innerHTML=data.foot;
+    // 顺便联动紫色卡的名称
+    document.querySelector('.kpi.c-purple .k-val').textContent=name;
+  });
+});
+
+/* ========== 开关交互 ========== */
+document.querySelectorAll('.switch').forEach(s=>{
+  s.addEventListener('click',()=>s.classList.toggle('on'));
+});
+
+/* ========== 策略标签切换 ========== */
+document.querySelectorAll('.strat-tag').forEach(t=>{
+  t.addEventListener('click',e=>{
+    if(e.target.classList.contains('ic')) return; // 编辑/删除不触发切换
+    document.querySelectorAll('.strat-tag').forEach(x=>x.classList.remove('on'));
+    t.classList.add('on');
+    // 同步顶部下拉
+    const name=t.firstChild.textContent.trim();
+    const sel=document.querySelector('.strategy-top .sel');
+    [...sel.options].forEach(o=>o.selected = o.text.trim()===name);
+  });
+});
+
+/* ========== 添加时段 ========== */
+function addSlot(){
+  const list=document.getElementById('slotList');
+  const row=document.createElement('div');
+  row.className='ts-row';
+  row.innerHTML=`
+    <div class="time-pickers">
+      <input class="inp" type="time" value="00:00">
+      <span class="arrow">~</span>
+      <input class="inp" type="time" value="00:00">
+    </div>
+    <select class="sel"><option>充电</option><option>放电</option><option>待机</option></select>
+    <input class="inp" type="number" value="0.00">
+    <div style="text-align:center"><span class="ic" style="cursor:pointer;color:var(--red)" onclick="this.parentElement.parentElement.remove()">🗑</span></div>`;
+  list.appendChild(row);
+}
+window.addSlot=addSlot;
+
+/* ========== 系统运行曲线（纯 SVG） ========== */
+function drawOpCurve(){
+  const box=document.getElementById('opCurve');
+  if(!box) return;
+  box.innerHTML='';
+  const W=box.clientWidth||900, H=260;
+  const PAD={t:18,r:42,b:30,l:46};
+  const innerW=W-PAD.l-PAD.r, innerH=H-PAD.t-PAD.b;
+  const xMax=23.98, xMin=0;
+  const yL={min:-150,max:100};  // 左轴 kW
+  const yR={min:0,max:100};     // 右轴 SOC %
+
+  const xs=v=>PAD.l+(v-xMin)/(xMax-xMin)*innerW;
+  const yl=v=>PAD.t+(yL.max-v)/(yL.max-yL.min)*innerH;
+  const yr=v=>PAD.t+(yR.max-v)/(yR.max-yR.min)*innerH;
+
+  const NS='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.setAttribute('width',W); svg.setAttribute('height',H);
+  svg.style.display='block';
+
+  // 网格
+  const grid=document.createElementNS(NS,'g');
+  for(let i=0;i<=6;i++){
+    const y=PAD.t+i*innerH/6;
+    const l=document.createElementNS(NS,'line');
+    l.setAttribute('x1',PAD.l); l.setAttribute('x2',W-PAD.r);
+    l.setAttribute('y1',y); l.setAttribute('y2',y);
+    l.setAttribute('stroke','#1b4468'); l.setAttribute('stroke-width','0.6'); l.setAttribute('stroke-dasharray','2 4');
+    grid.appendChild(l);
+    // 左轴标
+    const v=Math.round(yL.max-i*(yL.max-yL.min)/6);
+    const t=document.createElementNS(NS,'text');
+    t.setAttribute('x',PAD.l-8); t.setAttribute('y',y+4); t.setAttribute('text-anchor','end');
+    t.setAttribute('fill','#5b7a96'); t.setAttribute('font-size','10'); t.textContent=v;
+    grid.appendChild(t);
+  }
+  for(let i=0;i<=4;i++){
+    const y=PAD.t+i*innerH/4;
+    const t=document.createElementNS(NS,'text');
+    t.setAttribute('x',W-PAD.r+8); t.setAttribute('y',y+4);
+    t.setAttribute('fill','#ff6dc8'); t.setAttribute('font-size','10');
+    t.textContent=Math.round(yR.max-i*(yR.max-yR.min)/4);
+    grid.appendChild(t);
+  }
+  // X 轴时间标
+  const xTicks=[0,3.16,6.31,9.47,12.63,15.79,18.95,22.11,23.98];
+  xTicks.forEach(v=>{
+    const x=xs(v);
+    const t=document.createElementNS(NS,'text');
+    t.setAttribute('x',x); t.setAttribute('y',H-PAD.b+16); t.setAttribute('text-anchor','middle');
+    t.setAttribute('fill','#5b7a96'); t.setAttribute('font-size','10');
+    const h=Math.floor(v); const m=Math.floor((v-h)*60);
+    t.textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    grid.appendChild(t);
+  });
+  svg.appendChild(grid);
+
+  // 数据（6 条曲线）
+  // 0=市电 1=光伏 2=储能 3=负载 4=充放电预测 5=SOC
+  const N=48;
+  const data=[
+    [10,12,15,18,22,28,30,32,35,40,42,45,48,50,55,52,48,45,40,35,30,25,22,18,15,12,10,8,5,3,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,2,5,10,18,28,40,55,68,82,90,95,88,72,55,40,28,18,10,5,3,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [-10,-15,-20,-25,-30,-35,-40,-45,-50,-40,-30,-20,-10,0,10,20,30,40,50,60,70,75,80,85,90,85,78,70,60,50,40,30,20,10,5,-15,-30,-45,-55,-50,-40,-30,-20,-10,-5,-3,-2,-1],
+    [30,32,32,34,35,38,40,42,45,48,52,55,58,60,62,65,68,70,68,65,58,52,48,45,42,40,38,36,35,34,33,32,32,32,32,32,33,34,36,40,45,50,55,58,55,50,45,40],
+    [25,28,30,32,35,38,42,45,48,52,55,58,60,62,65,68,65,62,58,55,52,48,45,42,40,38,35,33,32,31,30,30,30,30,30,32,34,38,42,45,48,52,55,55,52,48,42,38],
+    [22,20,18,15,12,10,8,6,5,4,3,2,2,3,5,8,12,16,22,28,35,42,50,58,65,72,78,82,85,88,90,92,93,94,94,93,90,86,80,74,68,62,56,50,46,42,38,35],
+  ];
+  const colors=['#00d4ff','#ffb020','#ff4757','#a78bfa','#00ff9d','#ff6dc8'];
+  const ys=[yl,yl,yl,yl,yl,yr];
+  data.forEach((arr,i)=>{
+    let d='';
+    arr.forEach((v,j)=>{
+      const x=PAD.l+j*innerW/(N-1), y=ys[i](v);
+      d+=(j===0?'M':' L')+x.toFixed(1)+' '+y.toFixed(1);
+    });
+    const p=document.createElementNS(NS,'path');
+    p.setAttribute('d',d);
+    p.setAttribute('fill','none');
+    p.setAttribute('stroke',colors[i]);
+    p.setAttribute('stroke-width','1.6');
+    p.setAttribute('opacity',i===5?'0.9':'0.85');
+    svg.appendChild(p);
+  });
+
+  // 高亮时点 + 悬停预览框
+  const hoverX=xs(13.5);
+  const guide=document.createElementNS(NS,'line');
+  guide.setAttribute('x1',hoverX); guide.setAttribute('x2',hoverX);
+  guide.setAttribute('y1',PAD.t); guide.setAttribute('y2',H-PAD.b);
+  guide.setAttribute('stroke','#00d4ff'); guide.setAttribute('stroke-width','1');
+  guide.setAttribute('stroke-dasharray','3 4'); guide.setAttribute('opacity','0.6');
+  svg.appendChild(guide);
+
+  // 悬停预览数据盒
+  const hoverBox=document.createElementNS(NS,'g');
+  const idx=Math.floor(13.5/24*N);
+  const vals=[data[0][idx],data[1][idx],data[2][idx],data[3][idx],data[4][idx],data[5][idx]];
+  const labels=['光伏','负荷综合预测','光伏预测','储能策略功率','SOC'];
+  const colors2=['#ffb020','#00ff9d','#ffb020','#ff4757','#ff6dc8'];
+  const bx=hoverX+10, by=PAD.t+10, bw=130, bh=92;
+  // 背景框
+  const bg=document.createElementNS(NS,'rect');
+  bg.setAttribute('x',bx); bg.setAttribute('y',by); bg.setAttribute('width',bw); bg.setAttribute('height',bh);
+  bg.setAttribute('rx',4); bg.setAttribute('fill','rgba(2,6,13,.92)');
+  bg.setAttribute('stroke','#00d4ff'); bg.setAttribute('stroke-width','1');
+  hoverBox.appendChild(bg);
+  // 顶部高亮条
+  const top=document.createElementNS(NS,'rect');
+  top.setAttribute('x',bx); top.setAttribute('y',by); top.setAttribute('width',bw); top.setAttribute('height',2);
+  top.setAttribute('fill','#00d4ff');
+  hoverBox.appendChild(top);
+  // 文本
+  for(let i=0;i<5;i++){
+    const t1=document.createElementNS(NS,'text');
+    t1.setAttribute('x',bx+10); t1.setAttribute('y',by+18+i*15);
+    t1.setAttribute('fill',colors2[i]); t1.setAttribute('font-size','11'); t1.setAttribute('font-weight','600');
+    t1.textContent='● '+labels[i];
+    hoverBox.appendChild(t1);
+    const t2=document.createElementNS(NS,'text');
+    t2.setAttribute('x',bx+bw-10); t2.setAttribute('y',by+18+i*15);
+    t2.setAttribute('fill','#e6f4fb'); t2.setAttribute('font-size','11');
+    t2.setAttribute('text-anchor','end'); t2.setAttribute('font-weight','700');
+    t2.textContent=vals[i].toFixed(1);
+    hoverBox.appendChild(t2);
+  }
+  svg.appendChild(hoverBox);
+
+  box.appendChild(svg);
+}
+
+/* ========== 优化效果对比图 ========== */
+function drawCompare(){
+  const box=document.getElementById('compareChart');
+  if(!box) return;
+  box.innerHTML='';
+  const W=box.clientWidth||900, H=300;
+  const PAD={t:18,r:42,b:60,l:46};
+  const innerW=W-PAD.l-PAD.r, innerH=H-PAD.t-PAD.b;
+  const NS='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.setAttribute('width',W); svg.setAttribute('height',H);
+
+  // 数据：8 项指标 × {AI, 传统, 提升%}
+  const cats=[
+    {n:'光伏预测率(%)', ai:95, old:88, gain:7.9},
+    {n:'日负荷电量(kWh)', ai:1080, old:1320, gain:-18.2},
+    {n:'储能SOC变动频次(%)', ai:35, old:60, gain:-41.7},
+    {n:'负荷调度自动率(%)', ai:96, old:55, gain:74.5},
+    {n:'光伏调度偏差指数', ai:78, old:148, gain:-47.3},
+    {n:'电网调度偏差(kWh)', ai:38, old:90, gain:-57.8},
+    {n:'日综合调度成本(元)', ai:426, old:680, gain:-37.4},
+    {n:'系统日碳排放减量(kg)', ai:128, old:96, gain:33.3},
+  ];
+  const maxBar=Math.max(...cats.flatMap(c=>[c.ai,c.old]));
+  const maxGain=Math.max(...cats.map(c=>Math.abs(c.gain)));
+
+  // 双 Y 轴
+  const yLMax=Math.ceil(maxBar/100)*100;
+  const yRMax=Math.ceil(maxGain/20)*20;
+
+  // 网格 + Y 轴标
+  for(let i=0;i<=5;i++){
+    const y=PAD.t+i*innerH/5;
+    const l=document.createElementNS(NS,'line');
+    l.setAttribute('x1',PAD.l); l.setAttribute('x2',W-PAD.r); l.setAttribute('y1',y); l.setAttribute('y2',y);
+    l.setAttribute('stroke','#1b4468'); l.setAttribute('stroke-width','0.6'); l.setAttribute('stroke-dasharray','2 4');
+    svg.appendChild(l);
+    const t=document.createElementNS(NS,'text');
+    t.setAttribute('x',PAD.l-8); t.setAttribute('y',y+4); t.setAttribute('text-anchor','end');
+    t.setAttribute('fill','#5b7a96'); t.setAttribute('font-size','10');
+    t.textContent=Math.round(yLMax-i*yLMax/5);
+    svg.appendChild(t);
+  }
+  for(let i=0;i<=4;i++){
+    const y=PAD.t+i*innerH/4;
+    const t=document.createElementNS(NS,'text');
+    t.setAttribute('x',W-PAD.r+8); t.setAttribute('y',y+4);
+    t.setAttribute('fill','#00ff9d'); t.setAttribute('font-size','10');
+    t.textContent=Math.round(yRMax-i*yRMax/4)+'%';
+    svg.appendChild(t);
+  }
+
+  // Y 轴标签
+  const yLabelL=document.createElementNS(NS,'text');
+  yLabelL.setAttribute('x',12); yLabelL.setAttribute('y',PAD.t-4);
+  yLabelL.setAttribute('fill','#5b7a96'); yLabelL.setAttribute('font-size','10');
+  yLabelL.textContent='指标实测数据值';
+  svg.appendChild(yLabelL);
+  const yLabelR=document.createElementNS(NS,'text');
+  yLabelR.setAttribute('x',W-8); yLabelR.setAttribute('y',PAD.t-4); yLabelR.setAttribute('text-anchor','end');
+  yLabelR.setAttribute('fill','#00ff9d'); yLabelR.setAttribute('font-size','10');
+  yLabelR.textContent='优化提升/降低幅度 (%)';
+  svg.appendChild(yLabelR);
+
+  // 柱 + 折线
+  const groupW=innerW/cats.length;
+  const barW=groupW*0.18, gap=groupW*0.04;
+  const cx=i=>PAD.l+i*groupW+groupW/2;
+  const yScale=v=>PAD.t+(yLMax-v)/yLMax*innerH;
+  const yScaleR=v=>PAD.t+(yRMax-v)/yRMax*innerH;
+
+  // 折线（提升幅度 %）
+  let linePath='';
+  cats.forEach((c,i)=>{
+    const x=cx(i), y=yScaleR(Math.abs(c.gain));
+    linePath+=(i===0?'M':' L')+x.toFixed(1)+' '+y.toFixed(1);
+  });
+  const linePathEl=document.createElementNS(NS,'path');
+  linePathEl.setAttribute('d',linePath); linePathEl.setAttribute('fill','none');
+  linePathEl.setAttribute('stroke','#00ff9d'); linePathEl.setAttribute('stroke-width','2');
+  linePathEl.setAttribute('stroke-dasharray','4 3');
+  svg.appendChild(linePathEl);
+
+  cats.forEach((c,i)=>{
+    const x=cx(i);
+    // AI 柱（青）
+    const b1=document.createElementNS(NS,'rect');
+    const yAi=yScale(c.ai);
+    b1.setAttribute('x',x-barW-gap/2-barW); b1.setAttribute('y',yAi);
+    b1.setAttribute('width',barW); b1.setAttribute('height',PAD.t+innerH-yAi);
+    b1.setAttribute('fill','#00d4ff'); b1.setAttribute('opacity','0.85');
+    svg.appendChild(b1);
+    // 旧柱（橙）
+    const b2=document.createElementNS(NS,'rect');
+    const yOld=yScale(c.old);
+    b2.setAttribute('x',x+gap/2); b2.setAttribute('y',yOld);
+    b2.setAttribute('width',barW); b2.setAttribute('height',PAD.t+innerH-yOld);
+    b2.setAttribute('fill','#ffb020'); b2.setAttribute('opacity','0.75');
+    svg.appendChild(b2);
+    // 折线点
+    const dot=document.createElementNS(NS,'circle');
+    dot.setAttribute('cx',x); dot.setAttribute('cy',yScaleR(Math.abs(c.gain))); dot.setAttribute('r','3.5');
+    dot.setAttribute('fill','#00ff9d'); dot.setAttribute('stroke','#02060d'); dot.setAttribute('stroke-width','1.5');
+    svg.appendChild(dot);
+    // 标签（旋转 -30°）
+    const t=document.createElementNS(NS,'text');
+    t.setAttribute('x',x); t.setAttribute('y',H-PAD.b+14);
+    t.setAttribute('text-anchor','end'); t.setAttribute('fill','#8fa8bd'); t.setAttribute('font-size','10.5');
+    t.setAttribute('transform',`rotate(-22 ${x} ${H-PAD.b+14})`);
+    t.textContent=c.n;
+    svg.appendChild(t);
+  });
+
+  box.appendChild(svg);
+}
+
+window.addEventListener('resize',()=>{drawOpCurve(); drawCompare();});
+drawOpCurve(); drawCompare();
+</script>
+
+</body>
+</html>
