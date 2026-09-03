@@ -126,6 +126,16 @@ main{padding:0 28px 36px;position:relative;z-index:1}
 .range-btn:hover{border-color:var(--cyan);background:rgba(0,212,255,.12)}
 .range-input{width:60px;text-align:center;padding:5px 4px;background:rgba(0,30,60,.55);border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12.5px;outline:none}
 
+/* 9 大子系统 chip */
+.subsystem-strip{margin:14px 28px 0;padding:12px 18px;border:1px solid var(--line2);border-radius:10px;background:rgba(10,26,46,.5);display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:relative;z-index:1}
+.subsystem-strip .label{font-size:12px;color:var(--txt3);letter-spacing:.5px;flex-shrink:0;display:flex;align-items:center;gap:8px}
+.subsystem-strip .label::before{content:"";width:4px;height:14px;background:linear-gradient(180deg,var(--cyan),var(--purple));border-radius:2px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:14px;font-size:11.5px;background:rgba(0,30,60,.55);border:1px solid var(--line2);color:var(--txt2);transition:.15s}
+.chip.power{background:rgba(0,212,255,.08);border-color:rgba(0,212,255,.35);color:var(--cyan)}
+.chip.func{background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.3);color:var(--purple)}
+.chip .dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.chip.power .dot{box-shadow:0 0 4px var(--cyan)}
+
 /* 勾选行 */
 .check-group{display:flex;flex-direction:column;gap:8px;margin-top:4px}
 .check{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12.5px;color:var(--txt2);padding:4px 0}
@@ -239,6 +249,20 @@ main{padding:0 28px 36px;position:relative;z-index:1}
     <span><b>柴发备机</b>50 kW</span>
     <span><b>在线时长</b>128h 36min</span>
   </div>
+</div>
+
+<!-- 9 大子系统 -->
+<div class="subsystem-strip">
+  <span class="label">9 大子系统</span>
+  <span class="chip power"><span class="dot"></span>上方光伏</span>
+  <span class="chip power"><span class="dot"></span>柴油发电机</span>
+  <span class="chip power"><span class="dot"></span>储能电池</span>
+  <span class="chip func"><span class="dot"></span>无人机充电</span>
+  <span class="chip func"><span class="dot"></span>多设备充电</span>
+  <span class="chip func"><span class="dot"></span>卫星联网</span>
+  <span class="chip func"><span class="dot"></span>终端自组网</span>
+  <span class="chip func"><span class="dot"></span>数字哨兵</span>
+  <span class="chip func"><span class="dot"></span>环境监测</span>
 </div>
 
 <!-- Tab 切换 -->
